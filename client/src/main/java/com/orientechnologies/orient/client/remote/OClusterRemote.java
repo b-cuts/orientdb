@@ -236,6 +236,11 @@ public class OClusterRemote implements OCluster {
   }
 
   @Override
+  public void acquireAtomicExclusiveLock() {
+    throw new UnsupportedOperationException("Operation is not supported for given cluster implementation");
+  }
+
+  @Override
   public ORecordConflictStrategy getRecordConflictStrategy() {
     return null;
   }

@@ -186,6 +186,11 @@ public class OLuceneIndexEngineDelegate implements OLuceneIndexEngine {
   }
 
   @Override
+  public void acquireAtomicExclusiveLock() throws IOException {
+    this.acquireAtomicExclusiveLock();
+  }
+
+  @Override
   public void init(String indexName, String indexType, OIndexDefinition indexDefinition, boolean isAutomatic, ODocument metadata) {
     if (delegate == null) {
       if (OClass.INDEX_TYPE.FULLTEXT.name()

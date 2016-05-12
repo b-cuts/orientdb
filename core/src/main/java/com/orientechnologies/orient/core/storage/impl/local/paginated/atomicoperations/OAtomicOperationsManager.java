@@ -461,6 +461,12 @@ public class OAtomicOperationsManager implements OAtomicOperationsMangerMXBean {
     operation.addLockedObject(fullName);
   }
 
+  public void acquireExclusiveLockTillOperationComplete(ODurableComponent durableComponent){
+    final OAtomicOperation operation = currentOperation.get();
+    assert operation != null;
+    acquireExclusiveLockTillOperationComplete(operation, durableComponent.getFullName());
+  }
+
   public void acquireReadLock(ODurableComponent durableComponent) {
     if (unsafeMode.get() || writeAheadLog == null)
       return;

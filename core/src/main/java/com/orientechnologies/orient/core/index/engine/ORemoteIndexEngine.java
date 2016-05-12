@@ -49,6 +49,11 @@ public class ORemoteIndexEngine implements OIndexEngine {
   }
 
   @Override
+  public void acquireAtomicExclusiveLock() {
+
+  }
+
+  @Override
   public void init(String indexName, String indexType, OIndexDefinition indexDefinition, boolean isAutomatic, ODocument metadata) {
   }
 
@@ -177,4 +182,6 @@ public class ORemoteIndexEngine implements OIndexEngine {
       return null;
     }
   }
+
+
 }

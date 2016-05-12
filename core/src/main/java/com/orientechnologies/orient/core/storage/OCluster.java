@@ -161,5 +161,7 @@ public interface OCluster {
    */
   boolean hideRecord(long position) throws IOException;
 
+  void acquireAtomicExclusiveLock() throws IOException;
+
   ORecordConflictStrategy getRecordConflictStrategy();
 }

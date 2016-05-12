@@ -263,4 +263,9 @@ public class OOfflineCluster implements OCluster {
   public ORecordConflictStrategy getRecordConflictStrategy() {
     return null;
   }
+
+  @Override
+  public void acquireAtomicExclusiveLock() throws IOException {
+
+  }
 }

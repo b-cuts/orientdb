@@ -86,6 +86,14 @@ public final class OAutoShardingIndexEngine implements OIndexEngine {
     return name;
   }
 
+  @Override
+  public void acquireAtomicExclusiveLock() throws IOException {
+    //At This point of the tx i don't easily know which key are touched, locking all the partitions
+    for (OHashTable partition : partitions) {
+      partition.acquireAtomicExclusiveLock();
+    }
+  }
+
   public OAutoShardingStrategy getStrategy() {
     return strategy;
   }
@@ -309,4 +317,6 @@ public final class OAutoShardingIndexEngine implements OIndexEngine {
     final int partitionId = iKey != null ? strategy.getPartitionsId(iKey, partitionSize) : 0;
     return partitions.get(partitionId);
   }
+
+
 }

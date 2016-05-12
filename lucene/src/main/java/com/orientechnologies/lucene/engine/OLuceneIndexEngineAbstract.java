@@ -485,4 +485,10 @@ public abstract class OLuceneIndexEngineAbstract<V> extends OSharedResourceAdapt
   public void onStorageUnregistered(OStorage storage) {
 
   }
+
+  @Override
+  public void acquireAtomicExclusiveLock() throws IOException {
+    //TODO To get eventual lock fo the tx
+  }
+
 }

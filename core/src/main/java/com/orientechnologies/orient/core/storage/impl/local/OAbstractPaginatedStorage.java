@@ -1273,12 +1273,15 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
 
     final Iterable<ORecordOperation> entries = (Iterable<ORecordOperation>) clientTx.getAllRecordEntries();
 
+    Set<Integer> clusters = new TreeSet<Integer>();
+
     for (ORecordOperation txEntry : entries) {
       if (txEntry.type == ORecordOperation.CREATED || txEntry.type == ORecordOperation.UPDATED) {
         final ORecord record = txEntry.getRecord();
         if (record instanceof ODocument)
           ((ODocument) record).validate();
       }
+      clusters.add(txEntry.getRecord().getIdentity().getClusterId());
     }
 
     final List<ORecordOperation> result = new ArrayList<ORecordOperation>();
@@ -1286,16 +1289,16 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
     stateLock.acquireReadLock();
     try {
       try {
-        dataLock.acquireExclusiveLock();
         try {
-
           checkOpeness();
 
           if (writeAheadLog == null && clientTx.isUsingLog())
             throw new OStorageException("WAL mode is not active. Transactions are not supported in given mode");
 
-          makeStorageDirty();
           startStorageTx(clientTx);
+          for(Integer cluster:clusters)
+            getClusterById(cluster).acquireAtomicExclusiveLock();
+          makeStorageDirty();
 
           Map<ORecordOperation, OPhysicalPosition> positions = new IdentityHashMap<ORecordOperation, OPhysicalPosition>();
           for (ORecordOperation txEntry : entries) {
@@ -1344,7 +1347,7 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
           makeRollback(clientTx, e);
         } finally {
           transaction.set(null);
-          dataLock.releaseExclusiveLock();
+//          dataLock.releaseExclusiveLock();
         }
       } finally {
         ((OMetadataInternal) databaseRecord.getMetadata()).clearThreadLocalSchemaSnapshot();
@@ -1356,8 +1359,20 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
     return result;
   }
 
-  private void commitIndexes(OTransaction clientTx, final Map<String, OIndexInternal<?>> indexesToCommit) {
+  private void commitIndexes(OTransaction clientTx, final Map<String, OIndexInternal<?>> indexesToCommit) throws IOException {
     assert clientTx instanceof OTransactionOptimistic;
+
+    Set<OIndex<?>> set = new TreeSet<OIndex<?>>(new Comparator<OIndex<?>>() {
+      @Override
+      public int compare(OIndex<?> o1, OIndex<?> o2) {
+        return o1.getIndexId() - o2.getIndexId();
+      }
+    });
+
+    for (OIndex<?> oIndex : set) {
+      OIndexEngine engine = getIndexEngine(oIndex.getIndexId());
+      engine.acquireAtomicExclusiveLock();
+    }
 
     for (OIndexInternal<?> indexInternal : indexesToCommit.values())
       indexInternal.preCommit();
@@ -1426,7 +1441,7 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
     stateLock.acquireReadLock();
     try {
       try {
-        dataLock.acquireExclusiveLock();
+//        dataLock.acquireExclusiveLock();
         try {
           checkOpeness();
 
@@ -1482,7 +1497,7 @@ public abstract class OAbstractPaginatedStorage extends OStorageAbstract
         } catch (RuntimeException e) {
           makeRollback(clientTx, e);
         } finally {
-          dataLock.releaseExclusiveLock();
+//          dataLock.releaseExclusiveLock();
         }
       } finally {
         if (!success)

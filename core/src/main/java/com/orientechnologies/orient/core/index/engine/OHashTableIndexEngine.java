@@ -40,6 +40,7 @@ import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.impl.local.OAbstractPaginatedStorage;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -91,6 +92,11 @@ public final class OHashTableIndexEngine implements OIndexEngine {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public void acquireAtomicExclusiveLock() throws IOException {
+    hashTable.acquireAtomicExclusiveLock();
   }
 
   @Override

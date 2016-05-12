@@ -1762,6 +1762,10 @@ public class OSBTree<K, V> extends ODurableComponent {
     };
   }
 
+  public void startAtomicOperation() throws IOException {
+    atomicOperationsManager.acquireExclusiveLockTillOperationComplete(this);
+  }
+
   /**
    * Indicates search behavior in case of {@link OCompositeKey} keys that have less amount of internal keys are used, whether lowest
    * or highest partially matched key should be used.
